@@ -1,4 +1,5 @@
-namespaceScanner: scanner
-namespaceIls: ils
-jobName: scanner-patch-job
-image: quay.io/openshift/origin-cli:latest
+global:
+  namespaceScanner: scanner
+  namespaceIls: ils
+  jobName: scanner-patch-job
+  image: quay.io/openshift/origin-cli:latest
