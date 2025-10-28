@@ -1,8 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Values.jobName }}
-  namespace: {{ .Values.namespaceScanner }}
+  name: {{ .Values.global.jobName }}
+  namespace: {{ .Values.global.namespaceScanner }}
 spec:
   template:
     spec:
@@ -10,14 +10,14 @@ spec:
       serviceAccount: ibm-license-service-reporter-operator
       containers:
         - name: patcher
-          image: {{ .Values.image }}
+          image: {{ .Values.global.image }}
           command:
             - /bin/sh
             - -c
             - |
               set -e
-              NAMESPACE_SCANNER="{{ .Values.namespaceScanner }}"
-              NAMESPACE_ILS="{{ .Values.namespaceIls }}"
+              NAMESPACE_SCANNER="{{ .Values.global.namespaceScanner }}"
+              NAMESPACE_ILS="{{ .Values.global.namespaceIls }}"
 
               kubectl delete secret ibm-licensing-scanner-upload-secret -n $NAMESPACE_SCANNER || true
 
@@ -38,7 +38,7 @@ spec:
               EOF
           env:
             - name: NAMESPACE_SCANNER
-              value: "{{ .Values.namespaceScanner }}"
+              value: "{{ .Values.global.namespaceScanner }}"
             - name: NAMESPACE_ILS
-              value: "{{ .Values.namespaceIls }}"
+              value: "{{ .Values.global.namespaceIls }}"
       restartPolicy: Never
