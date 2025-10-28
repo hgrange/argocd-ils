@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jobName }}
+  namespace: {{ .Values.namespaceIls }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: patcher
+          image: {{ .Values.image }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              NAMESPACE_SCANNER="{{ .Values.namespaceScanner }}"
+              NAMESPACE_ILS="{{ .Values.namespaceIls }}"
+
+              kubectl delete secret ibm-licensing-scanner-upload-secret -n $NAMESPACE_SCANNER || true
+
+              upload_config_url_encoded=$(kubectl get configmap ibm-licensing-upload-config -n $NAMESPACE_ILS -o json | jq -r '.data.url' | tr -d '\n' | base64 | tr -d '\n')
+              upload_config_cert_encoded=$(kubectl get configmap ibm-licensing-upload-config -n $NAMESPACE_ILS -o json | jq -r '.data["crt.pem"]' | base64 | tr -d '\n' | tr -d ' ')
+              upload_config_token_encoded=$(kubectl get secret ibm-licensing-upload-token -n $NAMESPACE_ILS -o json | jq -r '.data["token-upload"]')
+
+              cat <<EOF | kubectl apply -f -
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: ibm-licensing-scanner-upload-secret
+                namespace: $NAMESPACE_SCANNER
+              data:
+                url: "$upload_config_url_encoded"
+                token: "$upload_config_token_encoded"
+                crt.pem: "$upload_config_cert_encoded"
+              EOF
+          env:
+            - name: NAMESPACE_SCANNER
+              value: "{{ .Values.namespaceScanner }}"
+            - name: NAMESPACE_ILS
+              value: "{{ .Values.namespaceIls }}"
+      restartPolicy: Never
+``
