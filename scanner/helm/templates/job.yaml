@@ -6,8 +6,8 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: ibm-license-service-reporter-operator
-      serviceAccount: ibm-license-service-reporter-operator
+      serviceAccountName: ibm-licensing-scanner-operator-service-account
+      serviceAccount: ibm-licensing-scanner-operator-service-account
       containers:
         - name: patcher
           image: {{ .Values.global.image }}
