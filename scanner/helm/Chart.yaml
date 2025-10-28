@@ -1,0 +1,5 @@
+
+apiVersion: v2
+name: ibm-scanner-patch
+description: A Helm chart to patch IBM Licensing Scanner to acces the license service
+version: 0.1.0
