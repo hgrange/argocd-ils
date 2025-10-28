@@ -2,10 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Values.jobName }}
-  namespace: {{ .Values.namespaceIls }}
+  namespace: {{ .Values.namespaceScanner }}
 spec:
   template:
     spec:
+      serviceAccountName: ibm-license-service-reporter-operator
       containers:
         - name: patcher
           image: {{ .Values.image }}
