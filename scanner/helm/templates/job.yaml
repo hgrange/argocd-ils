@@ -44,4 +44,3 @@ spec:
             - name: NAMESPACE_ILS
               value: "{{ .Values.namespaceIls }}"
       restartPolicy: Never
-``
