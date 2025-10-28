@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: {{ .Values.jobName }}
   namespace: {{ .Values.namespaceScanner }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+
 spec:
   template:
     spec:
