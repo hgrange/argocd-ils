@@ -7,6 +7,7 @@ spec:
   template:
     spec:
       serviceAccountName: ibm-license-service-reporter-operator
+      serviceAccount: ibm-license-service-reporter-operator
       containers:
         - name: patcher
           image: {{ .Values.image }}
