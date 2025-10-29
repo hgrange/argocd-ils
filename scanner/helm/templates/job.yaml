@@ -18,12 +18,22 @@ spec:
               set -xv
              
               
-              upload_config_url=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.url}' )
-              upload_config_cert=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.crt\.pem}' )
-              upload_config_token=$(kubectl get secret ibm-licensing-upload-token -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.token-upload}' | base64 -d )
+              upload_config_url_encoded=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.url}' | tr -d '\n' | base64 | tr -d '\n') 
+              upload_config_cert_encoded=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.crt\.pem}' | base64 | tr -d '\n'| tr -d ' ' )
+              upload_config_token_encoded=$(kubectl get secret ibm-licensing-upload-token -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.token-upload}' )
+
+              echo "
+              kind: Secret
+              apiVersion: v1
+              metadata:
+                namespace: $NAMESPACE_SCANNER
+                name: ibm-licensing-scanner-upload-secret
+              data:
+                url: "$upload_config_url_encoded"
+                token: "$upload_config_token_encoded"
+                crt.pem: "$upload_config_cert_encoded"
+              " | kubectl apply -f -
+
               
-              kubectl delete secret ibm-licensing-scanner-upload-secret -n {{ .Values.global.namespaceScanner }} || true  
-              oc create -n {{ .Values.global.namespaceScanner }} secret generic ibm-licensing-scanner-upload-secret --from-literal url=$upload_config_url \
-                 --from-literal crt.pem="$upload_config_cert" --from-literal token=$upload_config_token
             
       restartPolicy: Never
