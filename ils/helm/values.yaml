@@ -4,3 +4,6 @@ global:
   jobName: ils-patch-job
   image: quay.io/openshift/origin-cli:latest
   serviceaccount: ibm-license-service-patch
+  clusterID: ClusterTechzone
+  clusterName: ClusterTechzone
+  frequency: 0 */5 * * * *
