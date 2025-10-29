@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Values.global.jobName }}
-  namespace: {{ .Values.global.namespaceIls }}
+  namespace: {{ .Values.global.namespaceScanner }}
 spec:
   template:
     spec:
