@@ -3,4 +3,4 @@ global:
   namespaceIls: ils
   jobName: scanner-patch-job
   image: quay.io/openshift/origin-cli:latest
-  serviceaccount: ibm-licensing-operator
+  serviceaccount: ibm-scanner-secret-cm-sa
