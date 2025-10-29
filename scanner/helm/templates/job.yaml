@@ -20,7 +20,7 @@ spec:
               kubectl delete secret ibm-licensing-scanner-upload-secret -n {{ .Values.global.namespaceScanner }} || true
               upload_config_url=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.url}' )
               upload_config_cert=$(kubectl get configmap ibm-licensing-upload-config -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.crt\.pem}' )
-              upload_config_token=$(kubectl get secret ibm-licensing-upload-token -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.token-upload}' )
+              upload_config_token=$(kubectl get secret ibm-licensing-upload-token -n {{ .Values.global.namespaceIls }} -o jsonpath='{.data.token-upload}' | base64 -d )
 
               oc create -n {{ .Values.global.namespaceScanner }} secret generic ibm-licensing-scanner-upload-secret --from-literal url=$upload_config_url \
                  --from-literal crt.pem="$upload_config_cert" --from-literal token=$upload_config_token
