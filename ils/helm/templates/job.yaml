@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.global.jobName }}
+  namespace: {{ .Values.global.namespaceIls }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Values.global.serviceaccount }}
+      serviceAccount: {{ .Values.global.serviceaccount }}
+      containers:
+        - name: patcher
+          image: {{ .Values.global.image }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -xv
+              reporterURL=https://$(oc get route ibm-license-service-reporter -n {{ .Values.global.namespaceReporter }} -o jsonpath='{.spec.host}')
+              oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }}
+              oc get secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} -o yaml | grep -B50  ownerReferences | egrep -v 'ownerReferences|  namespace:' | oc apply -f - -n {{ .Values.global.namespaceIls }}
+              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"$reporterURL\",\"clusterID\":\"ClusterTest1\",\"clusterName\":\"Cluster1\",\"frequency\":\"0 */5 * * * *\"}}}"
+              
+              
+            
+      restartPolicy: Never
