@@ -7,3 +7,4 @@ global:
   clusterID: ClusterTechzone
   clusterName: ClusterTechzone
   frequency: 0 */5 * * * *
+  token: xxxxxxxxxxxxxx
