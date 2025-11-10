@@ -21,8 +21,8 @@ spec:
              
               #oc get secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} -o yaml | grep -B50  ownerReferences | egrep -v 'ownerReferences|  namespace:' | oc apply -f - -n {{ .Values.global.namespaceIls }}
               oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }} --from-literal token={{ .Values.global.token }}
-              oc patch secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter | b64enc }} --type merge --patch \
-              "{\"data\":{\"token\": \"{{ .Values.global.token }}\" }}"
+              oc patch secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter  }} --type merge --patch \
+              "{\"data\":{\"token\": \"{{ .Values.global.token | b64enc }}\" }}"
               oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch \
               "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"$reporterURL\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
               oc scale deploy ibm-license-service-reporter-instance --replicas=0 -n {{ .Values.global.namespaceReporter }} 
