@@ -24,7 +24,10 @@ spec:
               oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} --from-literal token={{ .Values.global.token }}
               oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch \
               "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"$reporterURL\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
-              
+              oc scale deploy ibm-licensing-service-instance --replicas=0 -n {{ .Values.global.namespaceReporter }} 
+              oc scale deploy ibm-licensing-service-instance --replicas=0  -n {{ .Values.global.namespaceIls }}
+              oc scale deploy ibm-licensing-service-instance --replicas=1 -n {{ .Values.global.namespaceReporter }} 
+              oc scale deploy ibm-licensing-service-instance --replicas=1  -n {{ .Values.global.namespaceIls }}
               
             
       restartPolicy: Never
