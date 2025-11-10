@@ -20,8 +20,8 @@ spec:
               oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }}
               oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }}
               #oc get secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} -o yaml | grep -B50  ownerReferences | egrep -v 'ownerReferences|  namespace:' | oc apply -f - -n {{ .Values.global.namespaceIls }}
-              oc create generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }} --from-literal token={{ .Values.global.token }}
-              oc create generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} --from-literal token={{ .Values.global.token }}
+              oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }} --from-literal token={{ .Values.global.token }}
+              oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} --from-literal token={{ .Values.global.token }}
               oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch \
               "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"$reporterURL\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
               
