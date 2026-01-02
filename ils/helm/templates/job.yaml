@@ -16,6 +16,12 @@ spec:
             - -c
             - |
               set -xv
+              
+              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch '{"spec":{"license":{"accept":true}}}'
+              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch '{"spec":{"labels":{"label1":"value1"}}}'
+              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch '{"spec":{"annotations":{"annotation1":"value1"}}}'
+              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch '{"spec":{"chargebackEnabled":true}}'
+            
               reporterURL=https://$(oc get route ibm-license-service-reporter -n {{ .Values.global.namespaceReporter }} -o jsonpath='{.spec.host}')
               oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }}
              
