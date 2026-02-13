@@ -1,0 +1,10 @@
+global:
+  namespace: liberty
+  namespaceIls: ils
+  jobName: ils-patch-job
+  image: quay.io/openshift/origin-cli:latest
+  serviceaccount: ibm-license-service-patch
+  clusterID: ClusterTechzone
+  clusterName: ClusterTechzone
+  frequency: 0 */5 * * * *
+  token: xxxxxxxxxxxxx
