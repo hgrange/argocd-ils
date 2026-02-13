@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.global.serviceAccount }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.applicatioName }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.global.applicatioName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.global.applicatioName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.applicatioName }}
+        {{- if (.Values.annotations) }}
+           {{- toYaml .Value.annotations | nindent 6 -}}
+        {{ end }}
+    spec:
+      containers:
+      - name: websphere
+        securityContext:
+          readOnlyRootFilesystem: true
+        image: {{ .Values.global.image }}
+        imagePullPolicy: Always
+        env:
+          - name: WLP_OUTPUT_DIR
+            value: /out
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        ports:
+        - containerPort: 9443
+        volumeMounts:
+          - mountPath: /opt/ibm/wlp/usr/servers/defaultServer/workaera
+            name: tmpfs-1
+          - mountPath: /opt/ibm/wlp/usr/servers/defaultServer/configDropins/defaults
+            name: tmpfs-2
+          - mountPath: /logs
+            name: tmpfs-3
+          - mountPath: /opt/ibm/wlp/usr/servers/defaultServer/apps/expanded
+            name: tmpfs-4
+          - mountPath: /out
+            name: tmpfs-5
+        workingDir: /logs
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 1
+      serviceAccount: {{ .Values.global.serviceAccount }}  
+      volumes:
+      - name: tmpfs-1
+        emptyDir: {}
+      - name: tmpfs-2
+        emptyDir: {}
+      - name: tmpfs-3
+        emptyDir: {}
+      - name: tmpfs-4
+        emptyDir: {}
+      - name: tmpfs-5
+        emptyDir: {}
