@@ -19,10 +19,10 @@ spec:
     metadata:
       labels:
         app: {{ .Values.global.applicationName }}
-        {{- if (.Values.annotations) }}
-        annotations:
-           {{- toYaml .Values.annotations | nindent 8 -}}
-        {{ end }}
+      {{- if (.Values.annotations) }}
+      annotations:
+        {{- toYaml .Values.annotations | nindent 8 -}}
+      {{ end }}
     spec:
       containers:
       - name: websphere
