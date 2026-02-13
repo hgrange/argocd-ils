@@ -1,7 +1,7 @@
 global:
   namespace: app1
   serviceAccount: was-operator
-  applicationName: modresorts
+  applicationName: app1
   image:  icr.io/appcafe/websphere-liberty:latest
 annotations:  
   cloudpakName: "IBM WebSphere Hybrid Edition"
