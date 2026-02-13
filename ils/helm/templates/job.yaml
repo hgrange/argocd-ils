@@ -16,18 +16,16 @@ spec:
             - -c
             - |
               set -xv
-              reporterURL=https://$(oc get route ibm-license-service-reporter -n {{ .Values.global.namespaceReporter }} -o jsonpath='{.spec.host}')
               oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }}
-             
               #oc get secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter }} -o yaml | grep -B50  ownerReferences | egrep -v 'ownerReferences|  namespace:' | oc apply -f - -n {{ .Values.global.namespaceIls }}
               oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }} --from-literal token={{ .Values.global.token }}
-              oc patch secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter  }} --type merge --patch \
+              #oc patch secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceReporter  }} --type merge --patch \
               "{\"data\":{\"token\": \"{{ .Values.global.token | b64enc }}\" }}"
               oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch \
-              "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"$reporterURL\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
-              oc scale deploy ibm-license-service-reporter-instance --replicas=0 -n {{ .Values.global.namespaceReporter }} 
+              "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"{{ .Values.global.reporterURL }}\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
+              #oc scale deploy ibm-license-service-reporter-instance --replicas=0 -n {{ .Values.global.namespaceReporter }} 
               oc scale deploy ibm-licensing-service-instance --replicas=0  -n {{ .Values.global.namespaceIls }}
-              oc scale deploy ibm-license-service-reporter-instance --replicas=1 -n {{ .Values.global.namespaceReporter }} 
+              #oc scale deploy ibm-license-service-reporter-instance --replicas=1 -n {{ .Values.global.namespaceReporter }} 
               oc scale deploy ibm-licensing-service-instance --replicas=1  -n {{ .Values.global.namespaceIls }}
               
             
