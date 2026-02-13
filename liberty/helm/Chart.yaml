@@ -1,0 +1,4 @@
+apiVersion: v2
+name: libert-withannotations
+description: A Helm chart to patch IBM Licensing Service to acces the license reporter
+version: 0.1.0
