@@ -20,7 +20,7 @@ spec:
       labels:
         app: {{ .Values.global.applicatioName }}
         {{- if (.Values.annotations) }}
-           {{- toYaml .Value.annotations | nindent 6 -}}
+           {{- toYaml .Values.annotations | nindent 6 -}}
         {{ end }}
     spec:
       containers:
