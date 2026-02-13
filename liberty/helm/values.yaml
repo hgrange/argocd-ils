@@ -1,10 +1,14 @@
 global:
   namespace: liberty
-  namespaceIls: ils
-  jobName: ils-patch-job
-  image: quay.io/openshift/origin-cli:latest
-  serviceaccount: ibm-license-service-patch
-  clusterID: ClusterTechzone
-  clusterName: ClusterTechzone
-  frequency: 0 */5 * * * *
-  token: xxxxxxxxxxxxx
+  serviceAccount: was-operator
+  applicationName: modresorts
+  image:  icr.io/appcafe/websphere-liberty:latest
+annotations:  
+  cloudpakName: "IBM WebSphere Hybrid Edition"
+  cloudpakId: "6358611af04743f99f42dadcd6e39d52"
+  productCloudpakRatio: "4:1" 
+  productID: "e7daacc46bbe4e2dacd2af49145a4723"
+  productName: "IBM WebSphere Application Server"
+  productMetric: "VIRTUAL_PROCESSOR_CORE"
+  productChargedContainers: "All"
+
