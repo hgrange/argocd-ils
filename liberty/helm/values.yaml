@@ -3,12 +3,3 @@ global:
   serviceAccount: was-operator
   applicationName: app1
   image:  icr.io/appcafe/websphere-liberty:latest
-annotations:  
-  cloudpakName: "IBM WebSphere Hybrid Edition"
-  cloudpakId: "6358611af04743f99f42dadcd6e39d52"
-  productCloudpakRatio: "4:1" 
-  productID: "e7daacc46bbe4e2dacd2af49145a4723"
-  productName: "IBM WebSphere Application Server"
-  productMetric: "VIRTUAL_PROCESSOR_CORE"
-  productChargedContainers: "All"
-
