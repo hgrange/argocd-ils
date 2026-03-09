@@ -26,7 +26,7 @@ spec:
               kind: Secret
               apiVersion: v1
               metadata:
-                namespace: $NAMESPACE_SCANNER
+                namespace: {{ .Values.global.namespaceScanner }}
                 name: ibm-licensing-scanner-upload-secret
               data:
                 url: "$upload_config_url_encoded"
