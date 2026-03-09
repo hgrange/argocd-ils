@@ -1,0 +1,51 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ibm-licensing-scanner-operator-clusterrole
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ibm-licensing-scanner-operator-clusterrole-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-licensing-scanner-operator-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: ibm-licensing-scanner-operator-service-account
+  namespace: {{ .Values.global.namespaceScanner }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ibm-licensing-scanner-clusterrole
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ibm-licensing-scanner-clusterrole-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-licensing-scanner-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: ibm-licensing-scanner-operand-service-account
+  namespace: {{ .Values.global.namespaceScanner }}
