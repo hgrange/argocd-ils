@@ -1,0 +1,4 @@
+apiVersion: v2
+name: oauth
+description: A Helm chart to patch ocp oauth for local users
+version: 0.1.0
