@@ -1,0 +1,44 @@
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: hub01-infra01-itz-q3xuba-identity-provider:config.openshift.io/OAuth:openshift-config/cluster
+    include.release.openshift.io/ibm-cloud-managed: "true"
+    include.release.openshift.io/self-managed-high-availability: "true"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"config.openshift.io/v1","kind":"OAuth","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"hub01-infra01-itz-q3xuba-identity-provider:config.openshift.io/OAuth:openshift-config/cluster"},"name":"cluster"},"spec":{"identityProviders":[{"mappingMethod":"claim","name":"IBMid","openID":{"claims":{"email":["email"],"groups":["member_of"],"preferredUsername":["email"]},"clientID":"d74c0bb8-60a7-482f-9520-6a9a7a3d153e","clientSecret":{"name":"openid-client-secret-isv"},"extraScopes":[],"issuer":"https://techzone.verify.ibm.com/oidc/endpoint/default"},"type":"OpenID"}]}}
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2026-03-05T13:38:54Z"
+  generation: 2
+  name: cluster
+  ownerReferences:
+  - apiVersion: config.openshift.io/v1
+    kind: ClusterVersion
+    name: version
+    uid: 92534e66-64db-4b94-b362-85581be632b0
+  resourceVersion: "42562"
+  uid: 76feabab-9719-4ad1-b8df-a26a3b5ed8f6
+spec:
+  identityProviders:
+  - mappingMethod: claim
+    name: IBMid
+    openID:
+      claims:
+        email:
+        - email
+        groups:
+        - member_of
+        preferredUsername:
+        - email
+      clientID: d74c0bb8-60a7-482f-9520-6a9a7a3d153e
+      clientSecret:
+        name: openid-client-secret-isv
+      extraScopes: []
+      issuer: https://techzone.verify.ibm.com/oidc/endpoint/default
+    type: OpenID
+  - name: htpasswd_provider
+    mappingMethod: claim
+    type: HTPasswd
+    htpasswd:
+      fileData:
+        name: htpass-secret
