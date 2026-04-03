@@ -16,7 +16,7 @@ spec:
             - -c
             - |
               set -xv    
-              oc patch namespace my-project \
+              oc patch namespace {{ .Values.global.namespace }}  \
               --type=merge \
               -p '{
                 "metadata": {
