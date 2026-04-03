@@ -15,10 +15,13 @@ spec:
             - /bin/sh
             - -c
             - |
-              set -xv
-              oc delete secret ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }}
-              oc create secret generic ibm-license-service-reporter-token -n {{ .Values.global.namespaceIls }} --from-literal token={{ .Values.global.token }}
-              oc patch -n {{ .Values.global.namespaceIls }} IBMLicensing instance --type merge  --patch \
-              "{\"spec\":{\"sender\":{\"reporterSecretToken\":\"ibm-license-service-reporter-token\",\"reporterURL\":\"{{ .Values.global.reporterURL }}\",\"clusterID\":\"{{ .Values.global.clusterID }}\",\"clusterName\":\"{{ .Values.global.clusterName }}\",\"frequency\":\"{{ .Values.global.frequency }}\"}}}"
-         
+              set -xv    
+              oc patch namespace my-project \
+              --type=merge \
+              -p '{
+                "metadata": {
+                "annotations": {
+                "openshift.io/sa.scc.uid-range": "1000870000/10000",
+                "openshift.io/sa.scc.supplemental-groups": "1000870000/10000",
+                "openshift.io/sa.scc.mcs": "s0:c30,c0" }}}'
       restartPolicy: Never
