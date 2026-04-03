@@ -1,5 +1,5 @@
 global:
-  namespaceReporter: reporter
+  namespace: reporter
   jobName: reporter-patch-project
   image: quay.io/openshift/origin-cli:latest
   serviceaccount: ibm-license-service-reporter-operator
