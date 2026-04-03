@@ -1,0 +1,4 @@
+apiVersion: v2
+name: ibm-reporter-patch
+description: A Helm chart to patch the project sccs
+version: 0.1.0
