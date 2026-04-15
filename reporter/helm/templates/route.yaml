@@ -8,7 +8,6 @@ metadata:
   name: ibm-lsr-console2
   namespace: reporter
 spec:
-  host: ibm-lsr-console2-reporter.apps.itz-q3xuba.infra01-lb.fra02.techzone.ibm.com
   path: /license-service-reporter
   port:
     targetPort: proxy
