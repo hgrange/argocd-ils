@@ -10,10 +10,10 @@ metadata:
 spec:
   path: /license-service-reporter
   port:
-    targetPort: proxy
+    targetPort: http
   tls:
-    insecureEdgeTerminationPolicy: None
-    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
   to:
     kind: Service
     name: ibm-license-service-reporter2
