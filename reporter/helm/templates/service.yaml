@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    annot4: value4
+  labels:
+    app.kubernetes.io/component: ibm-license-service-reporter-svc
+    app.kubernetes.io/instance: ibm-license-service-reporter
+    app.kubernetes.io/managed-by: operator
+    app.kubernetes.io/name: ibm-license-service-reporter-instance
+    label2: value2
+    release: ibm-license-service-reporter
+  name: ibm-license-service-reporter
+  namespace: reporter
+spec:
+  ports:
+  - name: receiver-port
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: proxy
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    app: ibm-license-service-reporter-instance
+    component: ibm-license-service-reporter-svc
+    licensing_cr: instance
+  sessionAffinity: None
+  type: NodePort
