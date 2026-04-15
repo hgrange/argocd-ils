@@ -4,14 +4,12 @@ metadata:
   annotations:
     annot4: value4
   labels:
-    app.kubernetes.io/component: ibm-license-service-reporter-svc2
-    app.kubernetes.io/instance: ibm-license-service-reporter2
-    app.kubernetes.io/managed-by: operator
-    app.kubernetes.io/name: ibm-license-service-reporter-instance2
-    licensing_cr: instance
+    app.kubernetes.io/component: ibm-license-service-reporter-svc
+    app.kubernetes.io/instance: ibm-license-service-reporter
+    app.kubernetes.io/name: ibm-license-service-reporter-instance
     label2: value2
-    release: ibm-license-service-reporter2
-  name: ibm-license-service-reporter2
+    release: ibm-license-service-reporter
+  name: ibm-license-service-reporter
   namespace: reporter
 spec:
   ports:
@@ -23,6 +21,10 @@ spec:
     port: 8888
     protocol: TCP
     targetPort: 8888
+  - name: http
+    port: 3001
+    protocol: TCP
+    targetPort: 3001
   selector:
     app: ibm-license-service-reporter-instance
     component: ibm-license-service-reporter-svc
