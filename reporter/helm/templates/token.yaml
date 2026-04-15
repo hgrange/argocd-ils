@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  token: QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQo=
+kind: Secret
+metadata:
+  annotations:
+    annot4: value4
+  labels:
+    app.kubernetes.io/component: ibm-license-service-reporter-svc
+    app.kubernetes.io/instance: ibm-license-service-reporter
+    app.kubernetes.io/managed-by: operator
+    app.kubernetes.io/name: ibm-license-service-reporter-instance
+    label2: value2
+    release: ibm-license-service-reporter
+  name: ibm-license-service-reporter-token
+  namespace: reporter
+type: Opaque
