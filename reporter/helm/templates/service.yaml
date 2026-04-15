@@ -3,7 +3,6 @@ kind: Service
 metadata:
   annotations:
     annot4: value4
-    service.beta.openshift.io/serving-cert-secret-name:
   labels:
     app.kubernetes.io/component: ibm-license-service-reporter-svc
     app.kubernetes.io/instance: ibm-license-service-reporter
