@@ -4,10 +4,11 @@ metadata:
   annotations:
     annot4: value4
   labels:
-    app.kubernetes.io/component: ibm-license-service-reporter-svc
-    app.kubernetes.io/instance: ibm-license-service-reporter
+    app.kubernetes.io/component: ibm-license-service-reporter-svc2
+    app.kubernetes.io/instance: ibm-license-service-reporter2
     app.kubernetes.io/managed-by: operator
-    app.kubernetes.io/name: ibm-license-service-reporter-instance
+    app.kubernetes.io/name: ibm-license-service-reporter-instance2
+    licensing_cr: instance
     label2: value2
     release: ibm-license-service-reporter2
   name: ibm-license-service-reporter2
