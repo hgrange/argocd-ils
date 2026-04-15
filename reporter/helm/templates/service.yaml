@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/name: ibm-license-service-reporter-instance
     label2: value2
     release: ibm-license-service-reporter2
-  name: ibm-license-service-reporter
+  name: ibm-license-service-reporter2
   namespace: reporter
 spec:
   ports:
