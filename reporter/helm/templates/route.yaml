@@ -12,8 +12,8 @@ spec:
   port:
     targetPort: proxy
   tls:
-    insecureEdgeTerminationPolicy: Redirect
-    termination: edge
+    insecureEdgeTerminationPolicy: None
+    termination: reencrypt
   to:
     kind: Service
     name: ibm-license-service-reporter2
