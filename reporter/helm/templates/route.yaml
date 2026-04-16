@@ -10,7 +10,7 @@ metadata:
 spec:
   path: /license-service-reporter
   port:
-    targetPort: http
+    targetPort: proxy
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
