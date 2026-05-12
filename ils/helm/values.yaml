@@ -9,3 +9,8 @@ vault:
   roleId: "8f5d296a-d06e-c9af-f9f3-87adbbe841f8"
   secretRef: vault-approle-creds
   secretKey: secret-id
+  server: vault2-vault.apps.itz-20ejfb.infra01-lb.lon04.techzone.ibm.com
+  secretStorePath: secret
+  refreshInterval: 1m
+  externalSecretPath: argocd/token/reporter_ils
+  
