@@ -7,4 +7,5 @@ global:
   clusterID: ClusterTechzone
   clusterName: ClusterTechzone
   frequency: 0 */5 * * * *
-  token: xxxxxxxxxxxxxx
+  roleId: "8f5d296a-d06e-c9af-f9f3-87adbbe841f8"
+  secretRef: vault-approle-creds
