@@ -4,7 +4,7 @@ global:
   jobName: ils-patch-job
   image: quay.io/openshift/origin-cli:latest
   serviceaccount: ibm-licensing-operator
-  frequency: 0 */5 * * * *
+  frequency: */1 * * * *
 vault:
   roleId: "8f5d296a-d06e-c9af-f9f3-87adbbe841f8"
   secretRef: vault-approle-creds
