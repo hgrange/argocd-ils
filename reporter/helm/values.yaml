@@ -3,4 +3,5 @@ global:
   jobName: reporter-patch-project
   image: quay.io/openshift/origin-cli:latest
   serviceaccount: ibm-license-service-reporter-operator
+  imagebck: icr.io/cpopen/cpfs/ibm-postgresql:4.2.23
   
