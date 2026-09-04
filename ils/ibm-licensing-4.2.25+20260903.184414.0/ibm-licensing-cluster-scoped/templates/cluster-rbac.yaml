@@ -1,0 +1,286 @@
+{{- if .Values.ibmLicensing.createRBAC }}
+{{- if not ((.Values.ibmLicensing.spec).features).nssEnabled }}
+---
+# Operand role (unrestricted): cluster-wide workload reads for the ibm-license-service operand SA. Rendered only when namespace-scope is off (nssEnabled != true).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-license-service
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - namespaces
+      {{- if ((.Values.ibmLicensing.spec).features).nodeCpuCappingEnabled }}
+      - nodes
+      {{- end }}
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - replicasets
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+  {{- if ((.Values.ibmLicensing.spec).features).customResourcesEnabled }}
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmlicensingmetadatas
+      - ibmlicensingdefinitions
+      - ibmlicensingquerysources
+    verbs:
+      - get
+      - list
+  {{- end }}
+  {{- if ((.Values.ibmLicensing.spec).features).kubeRBACAuthEnabled }}
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+  {{- end }}
+{{- end }}
+---
+# Restricted operand role: backs the ibm-license-service-restricted SA when nssEnabled=true. Always rendered; it carries the namespaces read rule unconditionally, plus node (CPU capping), metadata/definition/querysource CR read (customResources), and kube-RBAC auth rules when those features are enabled.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-license-service-restricted
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+  {{- if ((.Values.ibmLicensing.spec).features).nodeCpuCappingEnabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+  {{- end }}
+  {{- if ((.Values.ibmLicensing.spec).features).customResourcesEnabled }}
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmlicensingmetadatas
+      - ibmlicensingdefinitions
+      - ibmlicensingquerysources
+    verbs:
+      - get
+      - list
+  {{- end }}
+  {{- if ((.Values.ibmLicensing.spec).features).kubeRBACAuthEnabled }}
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+  {{- end }}
+---
+# Reader endpoint (NOT the operator): grants GET on the License Service HTTP URLs to the ibm-licensing-default-reader SA, consumed by API readers. The operator only provisions its token. Always rendered.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-licensing-default-reader
+rules:
+  - nonResourceURLs:
+      - /products
+      - /snapshot
+      - /bundled_products
+      - /health
+      - /status
+      - /services
+      - /workloads
+    verbs:
+      - get
+---
+# Operator control-plane role: bound to the operator pod SA (ibm-licensing-operator). The cluster-scoped IBMLicensing CR watch is irreducible, so this ClusterRole always renders.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-licensing-operator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmlicensings
+      - ibmlicensings/finalizers
+      - ibmlicensings/status
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  {{- if ((.Values.ibmLicensing.spec).features).operandRequestsEnabled }}
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - operandrequests
+      - operandrequests/finalizers
+      - operandrequests/status
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  {{- end }}
+  - apiGroups:
+      - operator.openshift.io
+    resources:
+      - servicecas
+    verbs:
+      - list
+{{- if not ((.Values.ibmLicensing.spec).features).nssEnabled }}
+---
+# Binds the unrestricted operand ClusterRole to the ibm-license-service SA. Gated in lockstep with that ClusterRole so the binding never dangles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-license-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-license-service
+subjects:
+  - kind: ServiceAccount
+    name: ibm-license-service
+    namespace: {{ .Values.ibmLicensing.namespace }}
+{{- end }}
+---
+# Binds the restricted operand ClusterRole to the ibm-license-service-restricted SA. Always rendered in lockstep with that ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-license-service-restricted
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-license-service-restricted
+subjects:
+  - kind: ServiceAccount
+    name: ibm-license-service-restricted
+    namespace: {{ .Values.ibmLicensing.namespace }}
+---
+# Binds the reader ClusterRole to the ibm-licensing-default-reader SA (the reader-token identity). Always rendered.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-licensing-default-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-licensing-default-reader
+subjects:
+  - kind: ServiceAccount
+    name: ibm-licensing-default-reader
+    namespace: {{ .Values.ibmLicensing.namespace }}
+---
+# Binds the operator control-plane ClusterRole to the operator pod SA. Always rendered.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-licensing-operator
+    app.kubernetes.io/managed-by: ibm-licensing-operator
+    app.kubernetes.io/name: ibm-licensing
+    component-id: {{ .Chart.Name }}
+  name: ibm-licensing-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-licensing-operator
+subjects:
+  - kind: ServiceAccount
+    name: ibm-licensing-operator
+    namespace: {{ .Values.ibmLicensing.namespace }}
+{{- end }}
