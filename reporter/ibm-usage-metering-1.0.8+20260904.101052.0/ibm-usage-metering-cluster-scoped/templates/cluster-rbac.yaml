@@ -1,0 +1,51 @@
+{{- $features := .Values.ibmUsageMetering.features }}
+{{- $anyFeature := or $features.nodeCpuCappingEnabled $features.kubeRBACAuthEnabled }}
+{{- if and (eq (lower .Values.ibmUsageMetering.executionMode) "processor_capacity_enabled") .Values.ibmUsageMetering.createRBAC $anyFeature }}
+{{- $instanceNamespace := .Values.global.instanceNamespace | default .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    component-id: {{ .Chart.Name }}
+  name: ibm-usage-metering-processor-capacity-{{ $instanceNamespace }}
+rules:
+{{- if $features.nodeCpuCappingEnabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+{{- end }}
+{{- if $features.kubeRBACAuthEnabled }}
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    component-id: {{ .Chart.Name }}
+  name: ibm-usage-metering-processor-capacity-{{ $instanceNamespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ibm-usage-metering-processor-capacity-{{ $instanceNamespace }}
+subjects:
+  - kind: ServiceAccount
+    name: ibm-usage-metering-instance
+    namespace: {{ $instanceNamespace }}
+{{- end }}

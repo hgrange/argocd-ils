@@ -1,0 +1,108 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-usage-metering-migration-job
+  namespace: {{ .Values.global.operatorNamespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-weight": "3"
+spec:
+  template:
+    spec:
+      containers:
+      - name: ibm-usage-metering-migration-job
+        image: {{ .Values.ibmUsageMetering.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.ibmUsageMetering.imageRegistry }}/cpfs-utils@sha256:c19dba22f78d4ff85278d4bbc15378b45337bde4de22a797fdeb26a30e941c22
+        command:
+          - bash
+          - -c
+          - |
+            echo "Starting cleanup for OLM -> Helm migration..."
+
+            operator_namespace={{ .Values.global.operatorNamespace }}
+            instance_namespace={{ .Values.global.instanceNamespace }}
+              
+            # Get names of resources that will be deleted
+            subscription_names=$(oc get --ignore-not-found subscription.operators.coreos.com -n $operator_namespace | grep ibm-usage-metering-operator | awk '{print $1}' | tr "\n" " ")
+            csv_names=$(oc get --ignore-not-found csv -n $operator_namespace | grep ibm-usage-metering-operator | awk '{print $1}' | tr "\n" " ")
+
+            if [[ -z "$subscription_names" ]]; then
+              echo "No Subscription associated with ibm-usage-metering found in namespace $operator_namespace."
+            else
+              echo "Removing subscriptions."
+              oc delete --ignore-not-found subscription.operators.coreos.com $subscription_names -n $operator_namespace
+            fi
+
+            if [[ -z "$csv_names" ]]; then
+              echo "No CSVs associated with ibm-usage-metering found in namespace $operator_namespace."
+            else
+              echo "Removing CSVs."
+              oc delete --ignore-not-found csv $csv_names -n $operator_namespace
+            fi
+
+            # Make sure operator deployment and rbac resources are deleted, even though it should be deleted automatically after removing CSV
+            oc delete --ignore-not-found deployment ibm-usage-metering-operator -n $operator_namespace
+
+            # Remove RBAC in operator namespace
+            role_binding_names=$(oc get --ignore-not-found rolebinding -n $operator_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+            role_names=$(oc get --ignore-not-found --no-headers role -n $operator_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+            service_account_names=$(oc get --ignore-not-found --no-headers serviceaccount -n $operator_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+
+            if [[ -n "$role_binding_names" ]]; then
+              echo "Removing role bindings in operator namespace."
+              oc delete --ignore-not-found rolebinding $role_binding_names -n $operator_namespace
+            fi
+
+            if [[ -n "$role_names" ]]; then
+              echo "Removing roles in operator namespace."
+              oc delete --ignore-not-found role $role_names -n $operator_namespace
+            fi
+
+            if [[ -n "$service_account_names" ]]; then
+              echo "Removing service accounts in operator namespace."
+              oc delete --ignore-not-found serviceaccount $service_account_names -n $operator_namespace
+            fi
+
+            # Remove RBAC in instance namespace, unless operator and instance are deployed in the same namespace
+            if [[ "$instance_namespace" != "$operator_namespace" ]]; then
+              role_binding_names=$(oc get --ignore-not-found rolebinding -n $instance_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+              role_names=$(oc get --ignore-not-found --no-headers role -n $instance_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+              service_account_names=$(oc get --ignore-not-found --no-headers serviceaccount -n $instance_namespace | grep ibm-usage-metering | grep -v ibm-usage-metering-migration | awk '{print $1}' | tr "\n" " ")
+
+              if [[ -n "$role_binding_names" ]]; then
+                echo "Removing role bindings in instance namespace."
+                oc delete --ignore-not-found rolebinding $role_binding_names -n $instance_namespace
+              fi
+
+              if [[ -n "$role_names" ]]; then
+                echo "Removing roles in instance namespace."
+                oc delete --ignore-not-found role $role_names -n $instance_namespace
+              fi
+
+              if [[ -n "$service_account_names" ]]; then
+                echo "Removing service accounts in instance namespace."
+                oc delete --ignore-not-found serviceaccount $service_account_names -n $instance_namespace
+              fi
+            fi
+
+            # Add managed-by label to ServiceCA-owned TLS secret, so that the operator reconciles it correctly
+            secret_name="ibm-usage-metering-instance"
+
+            if [[ -n $(oc get secret $secret_name -n $instance_namespace --ignore-not-found) ]]; then
+              echo "Updating managed-by label of ibm-usage-metering-instance TLS secret..."
+              
+              # Add managed-by label so operator cache includes this secret
+              oc label secret $secret_name -n $instance_namespace \
+                app.kubernetes.io/managed-by=ibm-usage-metering-operator \
+                --overwrite
+              
+              echo "Secret labeled successfully."
+            fi
+
+            echo "Migration of IBM Usage Metering Service completed"
+
+      restartPolicy: Never
+      serviceAccountName: ibm-usage-metering-migration-job-sa
+      imagePullSecrets:
+      - name: {{ .Values.global.imagePullSecret }}

@@ -1,0 +1,10 @@
+---
+global:
+  instanceNamespace: ""
+
+ibmUsageMetering:
+  executionMode: standard
+  createRBAC: true
+  features:
+    nodeCpuCappingEnabled: true
+    kubeRBACAuthEnabled: false

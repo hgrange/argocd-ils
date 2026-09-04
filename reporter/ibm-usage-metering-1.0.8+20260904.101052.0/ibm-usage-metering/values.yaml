@@ -1,0 +1,20 @@
+---
+global:
+  licenseAccept: true
+  imagePullPrefix: icr.io
+  imagePullSecret: ibm-entitlement-key
+  operatorNamespace: ""
+  instanceNamespace: ""
+  tetheredNamespaces: []
+ibmUsageMetering:
+  spec: {}
+  imageRegistryNamespaceOperator: cpopen
+  imageRegistryNamespaceOperand: cpopen/cpfs
+  enableRoutes: true
+  createRBAC: true
+  executionMode: standard
+  watchNamespace: ""
+  createRBACInWatchedNamespaces: true
+  features:
+    nodeCpuCappingEnabled: true
+    kubeRBACAuthEnabled: false

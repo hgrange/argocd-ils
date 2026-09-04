@@ -1,0 +1,13 @@
+---
+global:
+  operatorNamespace: ibm-usage-metering
+  instanceNamespace: ibm-usage-metering
+  imagePullPrefix: icr.io
+  imagePullSecret: ibm-entitlement-key
+  crAdoption: true
+
+ibmUsageMetering:
+  # image registry namespace for cpfs utils image, used in clean-job (kubernetes Job run by olm-utils team)
+  imageRegistry: cpopen/cpfs
+  # imagePullPrefix can be specified for ibmUsageMetering to override the value at .global
+  imagePullPrefix: icr.io

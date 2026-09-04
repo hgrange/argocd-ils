@@ -1,0 +1,228 @@
+{{- if .Values.ibmUsageMetering.createRBAC }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ibm-usage-metering-operator
+    component-id: {{ .Chart.Name }}
+  name: ibm-usage-metering-leader-election
+  namespace: {{ .Values.global.operatorNamespace | default .Release.Namespace  }}
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ibm-usage-metering-operator
+  namespace: {{ .Values.global.instanceNamespace | default .Release.Namespace  }}
+  labels:
+    component-id: {{ .Chart.Name }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - secrets
+      - serviceaccounts
+      - services
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - list
+      - patch
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmservicemeterdefinitions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmusagemeterings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmusagemeterings/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmusagemeterings/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+      - roles
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+{{- if .Values.ibmUsageMetering.enableRoutes }}
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ibm-usage-metering-operator
+    component-id: {{ .Chart.Name }}
+  name: ibm-usage-metering-leader-election
+  namespace: {{ .Values.global.operatorNamespace | default .Release.Namespace  }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ibm-usage-metering-leader-election
+subjects:
+  - kind: ServiceAccount
+    name: ibm-usage-metering-operator
+    namespace: {{ .Values.global.operatorNamespace | default .Release.Namespace  }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ibm-usage-metering-operator
+    component-id: {{ .Chart.Name }}
+  name: ibm-usage-metering-operator
+  namespace: {{ .Values.global.instanceNamespace | default .Release.Namespace  }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ibm-usage-metering-operator
+subjects:
+  - kind: ServiceAccount
+    name: ibm-usage-metering-operator
+    namespace: {{ .Values.global.operatorNamespace | default .Release.Namespace  }}
+{{- if (eq (lower .Values.ibmUsageMetering.executionMode) "processor_capacity_enabled") }}
+{{- $instanceNamespace := .Values.global.instanceNamespace | default .Release.Namespace }}
+{{- $targets := list $instanceNamespace }}
+{{- if .Values.ibmUsageMetering.createRBACInWatchedNamespaces }}
+{{-   $targets = splitList "," (include "ibm-usage-metering.watchNamespaces" .) }}
+{{- end }}
+{{- range $namespace := $targets }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    component-id: {{ $.Chart.Name }}
+  name: ibm-usage-metering-processor-capacity
+  namespace: {{ $namespace }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - operator.ibm.com
+    resources:
+      - ibmlicensingdefinitions
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    component-id: {{ $.Chart.Name }}
+  name: ibm-usage-metering-processor-capacity
+  namespace: {{ $namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ibm-usage-metering-processor-capacity
+subjects:
+  - kind: ServiceAccount
+    name: ibm-usage-metering-instance
+    namespace: {{ $instanceNamespace }}
+{{- end }}
+{{- end }}
+{{- end }}
